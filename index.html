@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grievance Box</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+
+<style>
+  /* Your original CSS retained exactly */
+  /* Reset and base styles */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0; height: 100%;
+    font-family: 'Inter', Arial, sans-serif;
+    background: linear-gradient(135deg, #a1c4fd 0%, #c2e9fb 100%);
+    color: #333;
+    transition: background-color 0.4s ease, color 0.4s ease;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body.dark-mode {
+    background: #121212;
+    color: #eee;
+  }
+  .app-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header, footer {
+    background: linear-gradient(45deg, #2193b0, #6dd5ed);
+    color: white;
+    font-family: 'Dancing Script', cursive, 'Inter', sans-serif;
+    font-weight: 700;
+    text-align: center;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    user-select: none;
+  }
+  header {
+    font-size: 1.9em;
+    letter-spacing: 2px;
+    padding: 15px 25px;
+  }
+  footer {
+    font-size: 0.9em;
+    padding: 10px 20px;
+    margin-top: auto;
+    box-shadow: 0 -3px 10px rgba(0,0,0,0.2);
+  }
+  body.dark-mode header, body.dark-mode footer {
+    background: linear-gradient(45deg, #144a6a, #387ca0);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.75);
+  }
+  #darkModeToggle {
+    position: fixed;
+    top: 15px; right: 15px;
+    padding: 10px 15px;
+    border-radius: 20px;
+    background: linear-gradient(45deg, #63f5b8, #25a0f8);
+    border: none;
+    color: #000;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: background 0.3s, color 0.3s;
+    z-index: 1500;
+    user-select: none;
+  }
+  body.dark-mode #darkModeToggle {
+    background: linear-gradient(45deg, #25a0f8, #63f5b8);
+    color: #222;
+  }
+  main {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px 15px;
+  }
+  .screen {
+    display: none;
+    max-width: 480px;
+    width: 100%;
+    background: rgba(255 255 255 / 0.9);
+    border-radius: 24px;
+    box-shadow: inset 0 0 15px 5px rgba(255,255,255,0.5), 0 20px 35px rgba(0, 0, 0, 0.15);
+    padding: 40px 35px;
+    box-sizing: border-box;
+    text-align: center;
+    backdrop-filter: blur(8px);
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .screen.active {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+  body.dark-mode .screen {
+    background: rgba(25 25 25 / 0.95);
+    box-shadow: inset 0 0 20px 6px rgba(40, 40, 40, 0.7), 0 25px 50px rgba(0,0,0,0.8);
+  }
+  h2, h3 {
+    font-family: 'Dancing Script', cursive, 'Inter', sans-serif;
+    font-weight: 700;
+    color: #34495e;
+    margin-bottom: 26px;
+    letter-spacing: 1.3px;
+    text-shadow: 1px 1px 3px rgba(0,0,0,0.05);
+  }
+  body.dark-mode h2, body.dark-mode h3 {
+    color: #aad4f5;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+  }
+  button {
+    font-family: 'Inter', Arial, sans-serif;
+    font-weight: 600;
+    font-size: 17px;
+    padding: 14px 30px;
+    margin: 14px 12px 12px 12px;
+    border: none;
+    border-radius: 15px;
+    cursor: pointer;
+    user-select: none;
+    letter-spacing: 0.8px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+    transition: background 0.3s ease, box-shadow 0.3s ease, transform 0.2s ease;
+  }
+  button.primary-btn {
+    background: linear-gradient(45deg, #3a8ddb, #6fd1ff);
+    color: white;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.25);
+  }
+  button.primary-btn:hover:not(:disabled) {
+    background: linear-gradient(45deg, #5bb3ff, #a3ddff);
+    box-shadow: 0 12px 25px rgba(29,88,160,0.7);
+    transform: translateY(-3px);
+  }
+  button.primary-btn:disabled {
+    background: #a0b7cc;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  button.secondary-btn {
+    background: #8fa6bc;
+    color: #f0f4f7;
+    text-shadow: 0 1px 1px rgba(0,0,0,0.1);
+  }
+  button.secondary-btn:hover {
+    background: #a1b8d1;
+  }
+  button.danger-btn {
+    background: #ff5c5c;
+    color: white;
+  }
+  button.danger-btn:hover {
+    background: #ff8181;
+  }
+  button.back-btn {
+    background: #e4b4d3;
+    color: #522940;
+    font-size: 15px;
+    padding: 10px 22px;
+    box-shadow: 0 3px 12px rgba(255, 186, 222, 0.6);
+    letter-spacing: 0.6px;
+  }
+  button.back-btn:hover {
+    background: #f2c4d9;
+  }
+  body.dark-mode button.primary-btn {
+    background: linear-gradient(45deg, #4f74a3, #679dd5);
+    color: white;
+  }
+  body.dark-mode button.primary-btn:hover:not(:disabled) {
+    background: linear-gradient(45deg, #8eb4ff, #a6c9ff);
+    box-shadow: 0 12px 25px rgba(80, 140, 215, 0.8);
+  }
+  body.dark-mode button.secondary-btn {
+    background: #607da8;
+    color: #d6e3fa;
+  }
+  button.api-btn {
+    background: linear-gradient(45deg, #42a5f5, #673ab7);
+    color: white;
+    font-size: 14px;
+    padding: 10px 20px;
+    margin: 8px 12px;
+    border-radius: 12px;
+  }
+  button.api-btn:hover {
+    background: linear-gradient(45deg, #71c4f5, #886dd1);
+  }
+  button.api-btn:disabled {
+    background: #909090;
+    cursor: not-allowed;
+  }
+  body.dark-mode button.api-btn {
+    background: linear-gradient(45deg, #64b5f6, #9575cd);
+  }
+  body.dark-mode button.api-btn:hover:not(:disabled) {
+    background: linear-gradient(45deg, #81c7f0, #ab89e0);
+  }
+
+  input, select, textarea {
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 16px;
+    width: 100%;
+    padding: 13px 18px;
+    margin: 8px 0 16px 0;
+    border-radius: 15px;
+    border: 2px solid #ccc;
+    outline-offset: 2px;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    box-sizing: border-box;
+    background: #fafafa;
+    color: #444;
+    box-shadow: inset 0 0 4px rgb(240 240 240 / 0.8);
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: #4f9de6;
+    box-shadow: 0 0 8px 2px rgba(79, 157, 230, 0.5);
+  }
+  body.dark-mode input,
+  body.dark-mode select,
+  body.dark-mode textarea {
+    background: #2a2a2a;
+    color: #ddd;
+    border-color: #555;
+    box-shadow: inset 0 0 7px rgba(90,90,90,0.9);
+  }
+  textarea { min-height: 140px; resize: vertical; }
+  .category-icons {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 18px;
+    gap: 12px;
+  }
+  .category-icons span {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 6px 14px;
+    border-radius: 32px;
+    background: #d0e6fb;
+    color: #0c4a90;
+    user-select: none;
+    transition: background-color 0.3s, color 0.3s;
+    font-size: 15px;
+  }
+  .category-icons span.selected,
+  .category-icons span:hover {
+    background: #2193b0;
+    color: white;
+    box-shadow: 0 8px 28px rgba(33,147,176,0.45);
+  }
+  body.dark-mode .category-icons span {
+    background: #486a9e;
+    color: #cbdcff;
+  }
+  body.dark-mode .category-icons span.selected,
+  body.dark-mode .category-icons span:hover {
+    background: #62a4f4;
+    color: #102c57;
+    box-shadow: 0 8px 28px rgba(98,164,244,0.65);
+  }
+  .validation-message {
+    color: #dc3545;
+    font-size: 0.9em;
+    margin-top: -12px;
+    margin-bottom: 12px;
+    min-height: 20px;
+    text-align: left;
+  }
+  body.dark-mode .validation-message {
+    color: #f66;
+  }
+  .char-counter {
+    font-size: 0.85em;
+    color: #666;
+    text-align: right;
+    margin-top: -10px;
+    margin-bottom: 20px;
+    letter-spacing: 0.4px;
+  }
+  body.dark-mode .char-counter {
+    color: #aaa;
+  }
+  .complaint-box {
+    background: #fff;
+    border-radius: 15px;
+    padding: 18px 25px;
+    margin-bottom: 20px;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.12);
+    text-align: left;
+    position: relative;
+    transition: box-shadow 0.3s ease;
+  }
+  .complaint-box:hover {
+    box-shadow: 0 20px 35px rgba(0,0,0,0.22);
+  }
+  body.dark-mode .complaint-box {
+    background: #1e1e2a;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.9);
+  }
+  .complaint-box strong {
+    font-size: 1.25em;
+    color: #3a517d;
+    margin-bottom: 8px;
+    display: block;
+  }
+  body.dark-mode .complaint-box strong {
+    color: #a1baff;
+  }
+  .complaint-box small {
+    font-size: 0.875em;
+    color: #757575;
+    margin-bottom: 14px;
+    display: block;
+  }
+  body.dark-mode .complaint-box small {
+    color: #9ca7db;
+  }
+  .complaint-box p {
+    font-size: 1em;
+    line-height: 1.55;
+    color: #4a4a4a;
+    margin-bottom: 18px;
+    white-space: pre-wrap;
+  }
+  body.dark-mode .complaint-box p {
+    color: #c0c7dd;
+  }
+  .complaint-likes {
+    display: flex;
+    gap: 24px;
+    font-weight: 700;
+    font-size: 1.12em;
+  }
+  .complaint-likes span {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: #28a745;
+    user-select: none;
+    transition: transform 0.15s ease, color 0.2s;
+  }
+  .complaint-likes span.dislike {
+    color: #dc3545;
+  }
+  .complaint-likes span:hover {
+    transform: scale(1.15);
+  }
+  .complaint-likes span.voted {
+    color: #007bff;
+    font-weight: 900;
+    transform: scale(1.1);
+  }
+  body.dark-mode .complaint-likes span.voted {
+    color: #62a4f4;
+  }
+  .delete-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: #ff5252;
+    border: none;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 1.1em;
+    box-shadow: 0 5px 15px rgba(255, 82, 82, 0.4);
+    transition: background 0.3s ease;
+    user-select: none;
+  }
+  .delete-btn:hover {
+    background: #ff7777;
+  }
+  .status-message {
+    margin: 15px 0 20px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 0.945em;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    border: 2.7px solid transparent;
+  }
+  .status-success {
+    background: #e6ffed;
+    color: #28a745;
+    border-color: #28a745;
+  }
+  .status-error {
+    background: #ffe6e6;
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+  .status-info {
+    background: #e0f7fa;
+    color: #007bff;
+    border-color: #007bff;
+  }
+  .status-warning {
+    background: #fff3cd;
+    color: #ffc107;
+    border-color: #ffc107;
+  }
+  #customMessageBox, #customConfirmBox {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 30px 35px;
+    border-radius: 15px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.48);
+    z-index: 3000;
+    display: none;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    font-family: 'Inter', Arial, sans-serif;
+    border: 3px solid;
+    box-sizing: border-box;
+  }
+  body.dark-mode #customMessageBox,
+  body.dark-mode #customConfirmBox {
+    background: #222;
+    color: #ddd;
+    border-color: #2193b0;
+  }
+  #customMessageBox p, #customConfirmBox p {
+    margin-bottom: 20px;
+    font-size: 1.2em;
+    color: #2b2b2b;
+  }
+  body.dark-mode #customMessageBox p,
+  body.dark-mode #customConfirmBox p {
+    color: #dde6ff;
+  }
+  #customMessageBox button, #customConfirmBox button {
+    margin-top: 10px;
+    padding: 14px 28px;
+    border-radius: 10px;
+    font-size: 1.05em;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+  }
+  #customMessageBox button {
+    background-color: #007bff;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0,123,255,0.25);
+    transition: background-color 0.3s ease;
+  }
+  #customMessageBox button:hover {
+    background-color: #4a90e2;
+  }
+  #customConfirmBox button#confirmYesBtn {
+    background-color: #28a745;
+    color: white;
+    margin-right: 14px;
+    box-shadow: 0 5px 15px rgba(40,164,40,0.25);
+  }
+  #customConfirmBox button#confirmYesBtn:hover {
+    background-color: #3eae3e;
+  }
+  #customConfirmBox button:last-child {
+    background-color: #dc3545;
+    color: white;
+    box-shadow: 0 5px 15px rgba(220,53,69,0.25);
+  }
+  #customConfirmBox button:last-child:hover {
+    background-color: #e46a6a;
+  }
+  #welcomePage img {
+    max-width: 80%;
+    height: auto;
+    margin-bottom: 20px;
+  }
+  .loading-spinner {
+    border: 4px solid rgba(0, 0, 0, 0.1);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border-left-color: #007bff;
+    animation: spin 1s ease infinite;
+    display: inline-block;
+    vertical-align: middle;
+  }
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  #actionPlanList {
+    margin-top: 15px;
+    text-align: left;
+    padding-left: 20px;
+  }
+  #actionPlanList li {
+    margin-bottom: 8px;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 600px) {
+    .screen {
+      margin: 12px auto;
+      padding: 25px 20px;
+      border-radius: 18px;
+    }
+    header {
+      font-size: 1.5em;
+      padding: 12px 20px;
+    }
+    footer {
+      font-size: 0.85em;
+      padding: 8px 15px;
+    }
+    button {
+      font-size: 15px;
+      padding: 12px 20px;
+      margin: 10px 8px;
+    }
+    h2, h3 {
+      font-size: 1.6em;
+      margin-bottom: 20px;
+    }
+    input, select, textarea {
+      font-size: 15px;
+      padding: 11px 14px;
+    }
+    textarea {
+      min-height: 110px;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+  <header>Grievance Box</header>
+
+  <button id="darkModeToggle" aria-label="Toggle Dark Mode">🌙 Dark Mode</button>
+
+  <main>
+    <!-- New Welcome Page with Image -->
+    <section class="screen active" id="welcomePage" aria-label="Welcome screen">
+        <img src="http://googleusercontent.com/file_content/1" alt="Grievance Box Logo" />
+        <h2>Welcome to Grievance Box</h2>
+        <p>A simple platform to submit and manage your grievances.</p>
+        <button class="primary-btn" onclick="showLoginPage()" aria-label="Proceed to Login">Get Started</button>
+    </section>
+
+    <!-- Login Selection -->
+    <section class="screen" id="loginPage" aria-label="Login selection screen">
+      <h2>Login</h2>
+      <button class="primary-btn" onclick="showStudentLogin()" aria-label="Student Login Selection">Student</button>
+      <button class="secondary-btn" onclick="showAdminLogin()" aria-label="Admin Login Selection">Admin</button>
+    </section>
+
+    <!-- Student Login -->
+    <section class="screen" id="studentLogin" aria-label="Student login screen">
+      <h3>Login as Student</h3>
+      <input type="text" id="studentNameInput" placeholder="Enter your Name" aria-label="Your Name" autocomplete="name" />
+      <input type="email" id="studentEmailInput" placeholder="Enter your Email ID" aria-label="Your Email ID" autocomplete="email" />
+      <input type="password" id="studentPinInput" placeholder="Enter your PIN" aria-label="Your PIN" autocomplete="current-password" />
+      <div id="loginValidation" class="validation-message" role="alert" aria-live="polite"></div>
+      <button class="primary-btn" onclick="studentLogin()" aria-label="Student Login Button">Login</button>
+      <button class="back-btn" onclick="showLoginPage()">Back</button>
+    </section>
+
+    <!-- Student Dashboard -->
+    <section class="screen" id="studentDashboard" aria-label="Student dashboard showing complaints">
+      <h2>Student Dashboard</h2>
+      <button class="primary-btn" onclick="showComplaintForm()">Submit a Complaint</button>
+      <button class="back-btn" onclick="studentLogout()">Logout</button>
+      <div id="studentComplaintList" aria-live="polite" aria-label="All complaints"></div>
+    </section>
+
+    <!-- Complaint Submission -->
+    <section class="screen" id="complaintSection" aria-label="Complaint submission form">
+      <h3>Submit your Complaint</h3>
+      <div class="daily-limit-message validation-message" id="dailyLimitMessage" role="alert" aria-live="polite"></div>
+      <div class="category-icons" role="list" aria-label="Complaint categories">
+        <span class="selected" data-value="Faculty" role="listitem" tabindex="0" aria-selected="true">👩‍🏫 Faculty</span>
+        <span data-value="Washroom" role="listitem" tabindex="0" aria-selected="false">🚻 Washroom</span>
+        <span data-value="Classroom Facility" role="listitem" tabindex="0" aria-selected="false">🏫 Classroom</span>
+        <span data-value="Other Facilities" role="listitem" tabindex="0" aria-selected="false">🛠 Other</span>
+        <span data-value="Electricity Problem" role="listitem" tabindex="0" aria-selected="false">⚡ Electricity</span>
+      </div>
+      <textarea id="complaintText" rows="4" placeholder="Enter your complaint here..." aria-label="Complaint text"></textarea>
+      <div class="validation-message" id="complaintValidation" role="alert" aria-live="assertive" aria-atomic="true"></div>
+      <div class="char-counter" id="charCounter">0 / 500 characters</div>
+      <button class="api-btn" id="refineComplaintBtn" onclick="refineComplaintText()">Refine Grievance ✨</button>
+      <button class="primary-btn" id="submitComplaintBtn" onclick="submitComplaint()" disabled>Submit Complaint</button>
+      <button class="back-btn" onclick="goToStudentDashboard()">Back to Dashboard</button>
+    </section>
+
+    <!-- Admin Login -->
+    <section class="screen" id="adminLogin" aria-label="Admin login screen">
+      <h3>Admin Login</h3>
+      <input type="password" id="adminPass" placeholder="Enter Admin Password" aria-label="Admin password input" />
+      <button class="primary-btn" onclick="verifyAdmin()" aria-label="Admin Login Button">Login</button>
+      <button class="back-btn" onclick="showLoginPage()">Back</button>
+    </section>
+
+    <!-- Admin Dashboard -->
+    <section class="screen" id="adminDashboard" aria-label="Admin dashboard">
+      <h2>Admin Dashboard</h2>
+      <button class="danger-btn" onclick="clearComplaints()" aria-label="Clear all complaints">Clear All Complaints</button>
+      <div id="complaintList" aria-live="polite" aria-relevant="additions removals"></div>
+      <button class="back-btn" onclick="showLoginPage()">Back to Login</button>
+    </section>
+  </main>
+
+  <footer>&copy; 2025 Grievance Box System</footer>
+</div>
+
+<script>
+  // Constants and variables
+  const badWords = ["worst", "stupid", "idiot", "hate", "damn"];
+  let currentUser = null;
+  const MAX_COMPLAINT_LENGTH = 500;
+  let isApiCalling = false;
+
+  // Fix: Declare currentCategory here. Initialize it with the first category.
+  let currentCategory = "Faculty";
+
+  // Single source of truth for stored complaints & loginRecords
+  let complaints = JSON.parse(localStorage.getItem("complaints") || "[]");
+  let loginRecords = JSON.parse(localStorage.getItem("loginRecords") || "{}");
+  let dailyComplaints = JSON.parse(localStorage.getItem("dailyComplaints") || "{}");
+
+  // DOM Elements
+  const complaintTextInput = document.getElementById('complaintText');
+  const complaintValidation = document.getElementById('complaintValidation');
+  const submitComplaintBtn = document.getElementById('submitComplaintBtn');
+  const refineComplaintBtn = document.getElementById('refineComplaintBtn');
+  const charCounter = document.getElementById('charCounter');
+  const darkModeToggle = document.getElementById('darkModeToggle');
+  const studentComplaintList = document.getElementById('studentComplaintList');
+  const complaintList = document.getElementById('complaintList');
+  const categoryIcons = document.querySelectorAll('.category-icons span');
+  const loginValidation = document.getElementById('loginValidation');
+  
+  // Student login inputs
+  const studentNameInput = document.getElementById('studentNameInput');
+  const studentEmailInput = document.getElementById('studentEmailInput');
+  const studentPinInput = document.getElementById('studentPinInput');
+  const dailyLimitMessage = document.getElementById('dailyLimitMessage');
+
+  // Utilities
+  function showScreen(id) {
+    document.querySelectorAll(".screen").forEach(el => el.clas
